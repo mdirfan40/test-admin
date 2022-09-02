@@ -7,6 +7,7 @@ import Container from "./components/Container.vue";
 export default {
   data() {
     return {
+      api: "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json",
       pageSize: 10,
       isEdit: false,
       edit: {},
@@ -14,7 +15,9 @@ export default {
       selectedIds: [],
       search: "",
       selectAllCheckbox: false,
+      // db mantian the replica of original data
       db: [],
+      // edit delete opreration done in bufffer replicate to db
       buffer: [],
       isLoading: false
     };
@@ -63,6 +66,9 @@ export default {
     paginate() {
       return this.buffer.slice(this.from, this.to);
     },
+    deleteConfirm() {
+      return window.confirm("Do you really want to delete");
+    },
     next() {
       this.page++;
     },
@@ -77,7 +83,7 @@ export default {
       this.db = this.db.filter((item) => item.id != id);
     },
     deleteSingle(id) {
-      const confirm = window.confirm("Do you really want to delete");
+      const confirm = this.deleteConfirm();
 
       if (confirm) {
         this.deleteItem(id);
@@ -85,7 +91,7 @@ export default {
       }
     },
     deleteSelected() {
-      const confirm = window.confirm("Do you really want to delete");
+      const confirm = this.deleteConfirm();
       if (confirm) {
         this.selectedIds.forEach((id) => this.deleteItem(id));
         this.selectedIds = [];
@@ -120,9 +126,8 @@ export default {
   async mounted() {
     this.isLoading = true;
     try {
-      const res = await fetch(
-        "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json"
-      );
+      const res = await fetch(this.api);
+
       this.db = await res.json();
       this.buffer = this.db;
     } catch (e) {

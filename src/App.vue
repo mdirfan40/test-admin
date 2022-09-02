@@ -1,6 +1,9 @@
 <script>
 import EditIcon from "./components/icons/EditIcon.vue";
 import DeleteIcon from "./components/icons/DeleteIcon.vue";
+import Table from "./components/Table.vue";
+import Popup from "./components/Popup.vue";
+import Container from "./components/Container.vue";
 export default {
   data() {
     return {
@@ -78,6 +81,7 @@ export default {
 
       if (confirm) {
         this.deleteItem(id);
+        this.selectedIds = [];
       }
     },
     deleteSelected() {
@@ -127,62 +131,36 @@ export default {
       this.isLoading = false;
     }
   },
-  components: { EditIcon, DeleteIcon }
+  components: { EditIcon, DeleteIcon, Table, Popup, Container }
 };
 </script>
 
 <template>
   <main>
-    <div
-      v-if="isEdit"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 15px;
-        background-color: rgba(0, 0, 0, 0.3);
-        z-index: 100;
-      "
-    >
-      <div
-        style="
-          background-color: white;
-          max-width: 600px;
-          border-radius: 5px;
-          padding: 15px;
-          margin: 5% auto 0 auto;
-        "
-      >
-        <div>
-          <h2>Edit</h2>
-        </div>
-
-        <div class="input">
-          <input v-model="edit.name" type="text" placeholder="name" />
-        </div>
-        <div class="input">
-          <input v-model="edit.email" type="text" placeholder="Email" />
-        </div>
-        <div class="input">
-          <input v-model="edit.role" type="text" placeholder="Email" />
-        </div>
-
-        <div style="margin-top: 2.3rem">
-          <button class="btn-primary" @click="save">Save</button>
-          <button class="btn-danger" @click="isEdit = false">Cancel</button>
-        </div>
+    <Popup :show="isEdit" title="Edit">
+      <div class="input">
+        <input v-model="edit.name" type="text" placeholder="name" />
       </div>
-    </div>
+      <div class="input">
+        <input v-model="edit.email" type="text" placeholder="Email" />
+      </div>
+      <div class="input">
+        <input v-model="edit.role" type="text" placeholder="Email" />
+      </div>
 
-    <div class="container">
+      <template v-slot:action>
+        <button class="btn-primary" @click="save">Save</button>
+        <button class="btn-danger" @click="isEdit = false">Cancel</button>
+      </template>
+    </Popup>
+
+    <Container>
       <div class="card">
         <h1>Admin</h1>
         <div class="input">
           <input v-model="search" type="text" placeholder="Search" />
         </div>
-        <table>
+        <Table>
           <tr>
             <th>
               <input
@@ -220,20 +198,17 @@ export default {
               </button>
             </td>
           </tr>
-        </table>
-
+        </Table>
         <div class="footer">
           <div class="footer-action">
             <div>
-              <transition>
-                <button
-                  @click="deleteSelected"
-                  v-if="selectedIds.length > 0"
-                  class="btn-danger"
-                >
-                  Delete ({{ this.selectedIds.length }})
-                </button>
-              </transition>
+              <button
+                @click="deleteSelected"
+                v-if="selectedIds.length > 0"
+                class="btn-danger"
+              >
+                Delete ({{ this.selectedIds.length }})
+              </button>
             </div>
             <div v-if="buffer.length > 0" class="pagination">
               <button :disabled="page === 0" @click="prev" class="prev">
@@ -254,34 +229,11 @@ export default {
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   </main>
 </template>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-td,
-th {
-  text-align: left;
-  padding: 0.5rem;
-}
-
-th {
-  font-weight: bold;
-}
-
-tr {
-  border-bottom: solid 1px rgb(225, 225, 225);
-  transition: all 0.5s ease;
-}
-
-tr:last-child {
-  border-bottom: solid 1px transparent;
-}
 .input {
   margin-bottom: 0.8rem;
 }
